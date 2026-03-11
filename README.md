@@ -1,8 +1,7 @@
 # Playground
 
-A sandbox repository for experimenting with Python code and scientific libraries.
-
-## Features
+A sandbox repository for experimenting with Python code and scientific libraries. So far, it
+includes:
 
 - **Type Checking Demo** (`match_case.py`):
 
@@ -25,7 +24,7 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
 1. Clone the repository:
 
    ```bash
-   git clone <repo-url>
+   git clone git@github.com:jlucas-oqc/playgound.git
    cd playground
    ```
 
