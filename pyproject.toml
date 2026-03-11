@@ -1,0 +1,33 @@
+[project]
+name = "playground"
+version = "0.1.0"
+description = "Playground for testing out Python code and libraries."
+authors = [
+    {name = "Jonathan Lucas",email = "jlucas@oqc.tech"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "scipy (>=1.17.1,<2.0.0)",
+    "matplotlib (>=3.10.8,<4.0.0)",
+    "pandas (>=3.0.1,<4.0.0)",
+    "pillow (>=12.1.1,<13.0.0)",
+    "iplantuml (>=0.1.1,<0.2.0)",
+    "pydantic (>=2.12.5,<3.0.0)",
+    "scipy-stubs (>=1.17.1.1,<2.0.0.0)"
+]
+
+[dependency-groups]
+dev = [
+    "jupyter (>=1.1.1,<2.0.0)"
+]
+[tool.poetry]
+package-mode = false
+[tool.ruff]
+# Allow lines to be as long as 120.
+line-length = 120
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
