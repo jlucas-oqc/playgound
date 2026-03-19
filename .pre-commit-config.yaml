@@ -25,8 +25,8 @@ repos:
     rev: 0.7.22
     hooks:
       - id: mdformat
-        args: [--wrap, "100"]
-        exclude: ^docs/index\.md$
+        args: [--wrap, "120"]
+        exclude: ^docs/preselection\.md$
         additional_dependencies:
           - mdformat-gfm
           - mdformat-frontmatter
