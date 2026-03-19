@@ -103,7 +103,7 @@ post-processing type. This will apply two post-processing steps:
    A more sophisticated decoder could calculate likelihoods for $|n\rangle$ from the distance metrics of the input
    symbol $r$ to the state centres $s_n$ and a noise estimate $\sigma^2$, using
 
-   $p(r \mid s_n) \propto \exp\left(-\frac{|r - s_n|^2}{\sigma^2}\right)$
+   $$p(r \mid s_{|n\rangle}) \propto \exp\left(-\frac{|r - s_{|n\rangle}|^2}{\sigma^2}\right)$$
 
    These likelihoods can be normalised to obtain real probabilities and the decoder can then output an "unknown" state
    if the probability of the best state is below a certain threshold, or if the probability difference between the top
