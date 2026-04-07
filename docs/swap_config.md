@@ -10,12 +10,33 @@ It combines:
 - disk swap — large fallback safety net
 - kernel tuning — smoother behaviour under memory pressure
 
-Assuming a 16GB RAM machine, the configuration looks like this:
+Assuming a 16GB RAM machine, the configuration looks like this.
+
+Note: Mermaid cannot automatically size boxes to exact memory proportions. The diagrams below show the right
+relationships and approximate capacities, but they are not to scale.
 
 ```mermaid
 flowchart LR
-    A[RAM\n16GB physical memory] -->|pressure builds| B[zram\ncompressed swap in RAM\nup to 12GB capacity\ndynamically sized]
-    B -->|zram capacity reached| C[swap.img\ndisk swap\n24GB fallback]
+    subgraph RAM16[Physical RAM: 16GB total]
+        SYS16[System working memory<br/>apps + cache]
+        Z16[zram in RAM<br/>up to 12GB logical swap<br/>allocated on demand]
+    end
+
+    SYS16 -. memory pressure .-> Z16
+    Z16 -->|zram full| D16[swap.img on disk<br/>24GB fallback]
+```
+
+For a 32GB RAM machine, the same config pattern looks like this:
+
+```mermaid
+flowchart LR
+    subgraph RAM32[Physical RAM: 32GB total]
+        SYS32[System working memory<br/>apps + cache]
+        Z32[zram in RAM<br/>up to 24GB logical swap<br/>allocated on demand]
+    end
+
+    SYS32 -. memory pressure .-> Z32
+    Z32 -->|zram full| D32[swap.img on disk<br/>48GB fallback]
 ```
 
 ______________________________________________________________________
