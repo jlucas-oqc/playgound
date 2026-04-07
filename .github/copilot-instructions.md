@@ -50,3 +50,12 @@ Use this section to capture concise, reusable guidance discovered during session
 - Context: Short description of the task/session.
 - Lesson: What guidance should be reused next time.
 - Action: Exact instruction added/updated in this file.
+
+### 2026-04-07
+
+- Date: `2026-04-07`
+- Context: Committing repository documentation updates.
+- Lesson: Always verify commit hooks and repository commit conventions before committing; use Conventional Commits in
+  commit messages.
+- Action: When asked to commit, check `.pre-commit-config.yaml` first and format commit messages as `type: description`
+  using allowed types.
