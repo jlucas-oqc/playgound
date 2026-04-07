@@ -1,19 +1,30 @@
 # Playground
 
-A sandbox repository for experimenting with Python code and scientific libraries. So far, it includes:
+A sandbox repository for experimenting with Python code and scientific libraries.
+
+## Code and Notebooks
 
 - **Type Checking Demo** (`match_case.py`):
 
-  - Demonstrates Python's structural pattern matching and type checking using dataclasses.
+  - Demonstrates Python structural pattern matching and type checking using dataclasses.
 
 - **Beta-binomial Distribution Notebook** (`beta_bin.ipynb`):
 
   - Demonstrates Bayesian analysis of binomial processes using the beta-binomial distribution, including how to
     determine the upper threshold for the expected number of new trials needed to achieve a given confidence level.
 
+- **Complex Pydantic Parsing Notebook** (`complex_pydantic_parsing.ipynb`):
+
+  - Demonstrates advanced usage of Pydantic for parsing lists of complex numbers.
+  - Shows how to serialize and deserialize complex number lists to and from JSON using Pydantic models.
+  - Includes examples of validating and parsing both complex and real numbers, handling mixed input types, and custom
+    JSON representations.
+
 - **Experimental Code** (`experimental/`):
 
   - Contains notebooks and scripts for experiments.
+
+## Documentation
 
 - **Preselection/Post-selection Epic Plan** (`docs/preselection.md`):
 
@@ -24,12 +35,11 @@ A sandbox repository for experimenting with Python code and scientific libraries
     confidence intervals.
   - Overview of future extensions for multi-state measurements and active reset.
 
-- **Complex Pydantic Parsing Notebook** (`complex_pydantic_parsing.ipynb`):
+- **Linux Memory Tuning Guide** (`docs/swap_config.md`):
 
-  - Demonstrates advanced usage of Pydantic for parsing lists of complex numbers.
-  - Shows how to serialize and deserialize complex number lists to and from JSON using Pydantic models.
-  - Includes examples of validating and parsing both complex and real numbers, handling mixed input types, and custom
-    JSON representations.
+  - Documents Linux swap/zram and kernel tuning for memory-intensive local test workloads.
+  - Provides step-by-step setup for disk swap, `zram`, and `sysctl` VM settings on a 16 GB dev machine profile.
+  - Includes verification commands and operational notes to avoid OOM kills and desktop freezes during large runs.
 
 ## Installation
 
