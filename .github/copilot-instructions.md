@@ -26,36 +26,17 @@
 - Keep changes compatible with repository hooks/tools (as configured in this repo).
 - For code changes, propose a minimal validation step and exact command(s).
 - Do not claim tests/checks were run unless they were actually run.
+- Before committing, check `.pre-commit-config.yaml` for commit requirements and follow allowed Conventional Commit
+  types.
+- Update this file (`.github/copilot-instructions.md`) when new guidance would improve future outcomes.
 
 ## Documentation Expectations
 
 - Update `README.md` when adding user-facing scripts, notebooks, or docs.
 - Keep markdown concise, with copyable command examples.
-- Update this file (`.github/copilot-instructions.md`) with lessons learned from Copilot sessions when new guidance
-  would improve future outcomes.
 
 ## Scope and Safety
 
 - Do not change unrelated files.
 - Preserve existing behavior unless a behavior change is explicitly requested.
 - Ask before making destructive or environment-wide changes.
-
-## Copilot Session Lessons Learned
-
-Use this section to capture concise, reusable guidance discovered during sessions.
-
-### Template
-
-- Date: `YYYY-MM-DD`
-- Context: Short description of the task/session.
-- Lesson: What guidance should be reused next time.
-- Action: Exact instruction added/updated in this file.
-
-### 2026-04-07
-
-- Date: `2026-04-07`
-- Context: Committing repository updates.
-- Lesson: Always verify commit hooks and repository commit conventions before committing; use Conventional Commits in
-  commit messages.
-- Action: When asked to commit, check `.pre-commit-config.yaml` first and format commit messages as `type: description`
-  using allowed types.
