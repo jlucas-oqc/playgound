@@ -26,8 +26,7 @@
 - Keep changes compatible with repository hooks/tools (as configured in this repo).
 - For code changes, propose a minimal validation step and exact command(s).
 - Do not claim tests/checks were run unless they were actually run.
-- Before committing, check `.pre-commit-config.yaml` for commit requirements and follow allowed Conventional Commit
-  types.
+- For commit workflow and message requirements, follow `.github/git-commit-instructions.md`.
 - Update this file (`.github/copilot-instructions.md`) when new guidance would improve future outcomes.
 
 ## Documentation Expectations
