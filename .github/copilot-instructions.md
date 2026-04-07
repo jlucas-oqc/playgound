@@ -54,7 +54,7 @@ Use this section to capture concise, reusable guidance discovered during session
 ### 2026-04-07
 
 - Date: `2026-04-07`
-- Context: Committing repository documentation updates.
+- Context: Committing repository updates.
 - Lesson: Always verify commit hooks and repository commit conventions before committing; use Conventional Commits in
   commit messages.
 - Action: When asked to commit, check `.pre-commit-config.yaml` first and format commit messages as `type: description`
