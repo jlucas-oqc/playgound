@@ -5,8 +5,8 @@ workloads like parallel test suites. The goal is to prevent OOM kills and severe
 swap) as the primary swap mechanism, with optional disk swap as a fallback.
 
 Using the 16GB baseline given here, the Qat pytest suite run at 4-way parallelism with a reasonable set of applications
-(IDE, broswer with 4-5 tabs, slack etc.) can use over 24GB of memory completes successfully without OOM kills and with
-only moderate swap usage. Without these tunings, the same workload frequently caused full system lockups.
+(IDE, broswer with 4-5 tabs, slack etc.) can use over 24GB of memory but completes successfully without OOM kills and
+with only moderate swap usage. Without these tunings, the same workload frequently caused full system lockups.
 
 The configuration is designed to be adaptable to larger RAM sizes (32GB/48GB/64GB) with simple adjustments.
 
