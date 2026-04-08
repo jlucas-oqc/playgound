@@ -1,8 +1,14 @@
 # Linux Memory Tuning for Large Test Workloads
 
-Without tuning, Linux dev machines can suffer OOM kills, severe slowdown or desktop freezes under large memory-intensive
-workloads (such as large parallel pytest suites). This guide permanently configures a machine to handle them more
-gracefully.
+This document lays out a recommended swap configuration for Linux development machines, optimized for large memory
+workloads like parallel test suites. The goal is to prevent OOM kills and severe slowdowns by using zram (compressed RAM
+swap) as the primary swap mechanism, with optional disk swap as a fallback.
+
+Using the 16GB baseline given here, the Qat pytest suite run at 4-way parallelism with a reasonable set of applications
+(IDE, broswer with 4-5 tabs, slack etc.) can use over 24GB of memory completes successfully without OOM kills and with
+only moderate swap usage. Without these tunings, the same workload frequently caused full system lockups.
+
+The configuration is designed to be adaptable to larger RAM sizes (32GB/48GB/64GB) with simple adjustments.
 
 It combines:
 
@@ -10,33 +16,29 @@ It combines:
 - disk swap — optional final fallback (mainly useful on lower-memory systems)
 - kernel tuning — smoother behaviour under memory pressure
 
-> **Note: all specific values in this guide (swap sizes, `PERCENT`, sysctl ratios) are tuned for a 16GB RAM machine.**
-> See [Scaling to larger memory systems](#scaling-to-larger-memory-systems) at the end for suggested values for 32GB,
-> 48GB, and 64GB machines.
+> **Note:** the commands given below use a 16GB baseline. Use
+> [Scaling to larger memory systems](#scaling-to-larger-memory-systems) for 32GB/48GB/64GB values.
 
-The configuration for a 16GB RAM machine looks like this.
-
-Note: Mermaid cannot automatically size boxes to exact memory proportions. The diagrams below show the right
-relationships and approximate capacities, but they are not to scale.
+16GB baseline:
 
 ```mermaid
 flowchart LR
     subgraph RAM16[Physical RAM: 16GB total]
         SYS16[System working memory<br/>apps + cache]
-        Z16[zram in RAM<br/>up to 12GB logical swap<br/>allocated on demand]
+        Z16["12GB zram<br/>(uses up to ~4.8GB RAM)"]
     end
 
     SYS16 -. memory pressure .-> Z16
     Z16 -->|zram full| D16[swap.img on disk<br/>24GB fallback]
 ```
 
-For a 32GB RAM machine, use the same pattern with a smaller disk-swap fallback:
+32GB example:
 
 ```mermaid
 flowchart LR
     subgraph RAM32[Physical RAM: 32GB total]
         SYS32[System working memory<br/>apps + cache]
-        Z32[zram in RAM<br/>up to 16GB logical swap<br/>allocated on demand]
+        Z32["24GB zram<br/>(uses up to ~9.6GB RAM)"]
     end
 
     SYS32 -. memory pressure .-> Z32
@@ -45,42 +47,7 @@ flowchart LR
 
 ______________________________________________________________________
 
-## Configure disk swap
-
-Use these recommended disk swap sizes:
-
-- **16GB RAM**: `24G` `/swap.img`
-- **32GB RAM**: `16G` `/swap.img`
-- **48GB RAM and above**: no disk swap (`0G`)
-
-The commands below use the 16GB baseline (`24G`); adjust the `fallocate -l` value for other sizes, or skip this section
-entirely when using `0G`.
-
-Use `/swap.img` consistently in all commands and in `/etc/fstab`.
-
-```bash
-sudo swapoff /swap.img || true
-sudo fallocate -l 24G /swap.img
-sudo chmod 600 /swap.img
-sudo mkswap /swap.img
-sudo swapon /swap.img
-```
-
-Verify:
-
-```bash
-swapon --show
-```
-
-Ensure `/etc/fstab` contains:
-
-```conf
-/swap.img none swap sw 0 0
-```
-
-______________________________________________________________________
-
-## Enable zram
+## Enable zram (compressed RAM swap)
 
 Install:
 
@@ -116,7 +83,7 @@ sudo systemctl restart zramswap
 sudo swapon -a
 ```
 
-Verify zram is active (and has higher priority if disk swap is enabled):
+Verify zram is active (and higher priority than disk swap, if present):
 
 ```bash
 zramctl
@@ -127,7 +94,35 @@ Expected: if `/swap.img` is present, the zram entry has a higher `PRIO` value.
 
 ______________________________________________________________________
 
-## Kernel tuning
+## Configure file-backed disk swap
+
+Commands below use the 16GB baseline (`24G`); change `fallocate -l` for other sizes, or skip this section for `0G`.
+
+Use `/swap.img` consistently in all commands and in `/etc/fstab`.
+
+```bash
+sudo swapoff /swap.img || true
+sudo fallocate -l 24G /swap.img
+sudo chmod 600 /swap.img
+sudo mkswap /swap.img
+sudo swapon /swap.img
+```
+
+Verify:
+
+```bash
+swapon --show
+```
+
+Ensure `/etc/fstab` contains:
+
+```conf
+/swap.img none swap sw 0 0
+```
+
+______________________________________________________________________
+
+## Kernel VM tuning
 
 Create a VM tuning `sysctl` file:
 
@@ -160,36 +155,37 @@ ______________________________________________________________________
 
 ## Scaling to larger memory systems
 
-### 1) Recommended settings by RAM size
+Based on practical QAT runs on 16GB/32GB, then extrapolated for larger RAM sizes. Validate with `zramctl` and `free`
+under load.
+
+### 1) Recommended settings
 
 | RAM size | zram `PERCENT` | zram logical cap (approx) | Disk swap (`/swap.img`) | `vm.dirty_background_ratio` | `vm.dirty_ratio` |
 | -------- | -------------- | ------------------------- | ----------------------- | --------------------------- | ---------------- |
-| 16 GB    | 75             | ~12 GB                    | 24 GB                   | 5                           | 15               |
-| 32 GB    | 50             | ~16 GB                    | 16 GB                   | 4                           | 12               |
-| 48 GB    | 42             | ~20 GB                    | 0 GB                    | 3                           | 10               |
-| 64 GB    | 38             | ~24 GB                    | 0 GB                    | 3                           | 10               |
+| 16 GB    | 75             | ~12.0 GB                  | 24 GB                   | 5                           | 15               |
+| 32 GB    | 75             | ~24.0 GB                  | 16 GB                   | 4                           | 12               |
+| 48 GB    | 60             | ~28.8 GB                  | 0 GB                    | 3                           | 10               |
+| 64 GB    | 50             | ~32.0 GB                  | 0 GB                    | 3                           | 10               |
 
 All other settings (`ALGO=zstd`, `PRIORITY=100`, `vm.swappiness=30`, `vm.vfs_cache_pressure=50`,
 `vm.overcommit_memory=1`) remain the same regardless of RAM size.
 
 ### 2) Expected behavior at high pressure (zram near cap)
 
-The table below shows expected performance of the system under high memory pressure, when zram is near its logical cap.
-
-Assumptions used for estimates:
+Assumptions:
 
 - zram compression ratio: `2.5:1`
-- `Expected zram RAM used ~= zram logical cap / 2.5`
-- `Expected native RAM used ~= physical RAM - expected zram RAM used`
-- `Logical memory resident in RAM ~= zram logical cap + expected native RAM used`
-- `Approx total logical memory ~= zram logical cap + expected native RAM used + disk swap`
+- Expected zram RAM used ~= zram logical cap / 2.5
+- Expected native RAM used ~= physical RAM - expected zram RAM used
+- Logical memory resident in RAM ~= zram logical cap + expected native RAM used
+- Approx total logical memory ~= zram logical cap + expected native RAM used + disk swap
 
 | RAM size | Expected native RAM used | Expected zram RAM used | Logical memory resident in RAM | Approx total logical memory |
 | -------- | ------------------------ | ---------------------- | ------------------------------ | --------------------------- |
-| 16 GB    | ~11 GB                   | ~5 GB                  | ~23 GB                         | ~47 GB                      |
-| 32 GB    | ~26 GB                   | ~6 GB                  | ~42 GB                         | ~58 GB                      |
-| 48 GB    | ~40 GB                   | ~8 GB                  | ~60 GB                         | ~60 GB                      |
-| 64 GB    | ~54 GB                   | ~10 GB                 | ~78 GB                         | ~78 GB                      |
+| 16 GB    | ~11.2 GB                 | ~4.8 GB                | ~23.2 GB                       | ~47.2 GB                    |
+| 32 GB    | ~22.4 GB                 | ~9.6 GB                | ~46.4 GB                       | ~62.4 GB                    |
+| 48 GB    | ~36.5 GB                 | ~11.5 GB               | ~65.3 GB                       | ~65.3 GB                    |
+| 64 GB    | ~51.2 GB                 | ~12.8 GB               | ~83.2 GB                       | ~83.2 GB                    |
 
 Logical caps from `PERCENT` are approximate; validate expected behavior on your workload with `zramctl` under load.
 
