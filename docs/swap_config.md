@@ -10,7 +10,11 @@ It combines:
 - disk swap — large fallback safety net
 - kernel tuning — smoother behaviour under memory pressure
 
-Assuming a 16GB RAM machine, the configuration looks like this.
+> **Note: all specific values in this guide (swap sizes, `SIZE`, sysctl ratios) are tuned for a 16GB RAM machine.** See
+> [Scaling to larger memory systems](#scaling-to-larger-memory-systems) at the end for suggested values for 32GB, 48GB,
+> and 64GB machines.
+
+The configuration for a 16GB RAM machine looks like this.
 
 Note: Mermaid cannot automatically size boxes to exact memory proportions. The diagrams below show the right
 relationships and approximate capacities, but they are not to scale.
@@ -32,7 +36,7 @@ For a 32GB RAM machine, the same config pattern looks like this:
 flowchart LR
     subgraph RAM32[Physical RAM: 32GB total]
         SYS32[System working memory<br/>apps + cache]
-        Z32[zram in RAM<br/>up to 24GB logical swap<br/>allocated on demand]
+        Z32[zram in RAM<br/>up to 16GB logical swap<br/>allocated on demand]
     end
 
     SYS32 -. memory pressure .-> Z32
@@ -86,8 +90,8 @@ sudo nano /etc/default/zramswap
 # zstd gives better compression at low CPU cost
 ALGO=zstd
 
-# Capacity headroom — not pre-allocated, only used under pressure
-PERCENT=75
+# Fixed logical swap cap — not pre-allocated, only used under pressure
+SIZE=12288
 
 # Prefer zram over disk swap (higher number = higher priority)
 PRIORITY=100
@@ -140,6 +144,30 @@ Apply:
 ```bash
 sudo sysctl --system
 ```
+
+______________________________________________________________________
+
+## Scaling to larger memory systems
+
+The rules of thumb used in this guide:
+
+- **zram `SIZE`**: set to a fixed absolute value rather than a percentage. ~12GB is sufficient on a 16GB machine; on
+  larger systems cap at 16384 MB (~16GB). Beyond ~16GB, zram starts competing with the workload for RAM rather than
+  helping it. Using `SIZE` directly is simpler and more explicit than computing a `PERCENT`.
+- **Disk swap**: 1.5× physical RAM — large enough to be a real safety net without wasting too much disk.
+- **`vm.swappiness`**: keep at `30` for all sizes; zram is fast enough that early swapping is acceptable.
+- **`vm.dirty_background_ratio` / `vm.dirty_ratio`**: scale down slightly on larger systems where writeback bursts can
+  be proportionally larger.
+
+| Setting                     | 16 GB | 32 GB | 48 GB | 64 GB |
+| --------------------------- | ----- | ----- | ----- | ----- |
+| zram `SIZE` (MB)            | 12288 | 16384 | 16384 | 16384 |
+| Disk swap (`/swap.img`)     | 24 GB | 48 GB | 72 GB | 96 GB |
+| `vm.dirty_background_ratio` | 5     | 4     | 3     | 3     |
+| `vm.dirty_ratio`            | 15    | 12    | 10    | 10    |
+
+All other settings (`ALGO=zstd`, `PRIORITY=100`, `vm.swappiness=30`, `vm.vfs_cache_pressure=50`,
+`vm.overcommit_memory=1`) remain the same regardless of RAM size.
 
 ______________________________________________________________________
 
